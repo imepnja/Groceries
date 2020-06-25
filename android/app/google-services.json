@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "703103967599",
+    "firebase_url": "https://groceries-4045c.firebaseio.com",
+    "project_id": "groceries-4045c",
+    "storage_bucket": "groceries-4045c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:703103967599:android:e3ced589b3067b316b489a",
+        "android_client_info": {
+          "package_name": "com.leo.Groceries"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "703103967599-d6qe3tgoqf4c63sbudcun0i2hk337mat.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBns0_R8NNIi-MVgegwX5_Z5bK6szTz7uw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "703103967599-d6qe3tgoqf4c63sbudcun0i2hk337mat.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
