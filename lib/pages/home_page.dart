@@ -1,3 +1,4 @@
+import 'package:Groceries/models/tag.dart';
 import 'package:Groceries/navigator.dart';
 import 'package:Groceries/pages/add_item_page.dart';
 import 'package:Groceries/databse.dart';
@@ -6,7 +7,10 @@ import 'package:Groceries/pages/edit_item_page.dart';
 import 'package:animated_stream_list/animated_stream_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import '../models/item.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -16,108 +20,106 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   GlobalKey<AnimatedListState> listKey = new GlobalKey<AnimatedListState>();
 
+  DatabaseService databaseService = DatabaseService();
+
+  List<Item> updateColors(List<Item> items, List<Tag> allTags) {
+    return items = items.map((i) {
+      i.tags = i.tags
+          .map((tag) => allTags
+              .firstWhere((element) => element.name == tag.name, orElse: null))
+          .toList();
+      return i;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Groceries', style: TextStyle(color: Colors.white)),
+        title: Text('Groceries',
+            style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 24)),
         centerTitle: true,
         actions: [
           PopupMenuButton(
-            color: Colors.white,
+            icon: Icon(
+              Icons.more_horiz,
+              color: Colors.white,
+            ),
+            onSelected: (value) {
+              if (value == 1) {
+                DatabaseService().deleteCheckedItems();
+              } else if (value == 2) {
+                DatabaseService().deleteAllItems();
+              }
+            },
             itemBuilder: (context) => [
               PopupMenuItem(
-                        child: Text('Clear checked items', style: TextStyle()),
-                        value: 1,
-                      ),
-                      PopupMenuItem(
-                        child: Text('Clear all items', style: TextStyle()),
-                        value: 2,
-                      ),
+                child: Text('Clear checked items', style: TextStyle()),
+                value: 1,
+              ),
+              PopupMenuItem(
+                child: Text('Clear all items', style: TextStyle()),
+                value: 2,
+              ),
             ],
-            onSelected: (value) {
-              if(value == 1) {
-                DatabaseService().deleteCheckedItems();
-              } else if(value == 2) {
-                DatabaseService().deleteAllItems();
-              } 
-            },
-            // onSelected: ,
           ),
         ],
       ),
-      // body: AnimatedStreamList<Item>(
-//
-      // streamList: DatabaseService().groceryListStream,
-      // itemBuilder: (Item item, index, context, animation) {
-      // print(animation);
-      // print('hey');
-      // return FadeTransition(
-      // opacity: animation,
-      // child: item,
-      // );
-      // },
-      // itemRemovedBuilder: (Item item, index, context, animation) {
-      // return FadeTransition(
-      // opacity: animation,
-      // child: item,
-      // );
-      // },
-      // ),
-
       body: StreamBuilder<List<Item>>(
-          stream: DatabaseService().groceryListStream,
+          stream: databaseService.groceryListStream,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-            // if (snapshot.data.length != 0) {
-              List<Item> list = snapshot.data;
-              int enabledCount =
-                  list.where((element) => element.enabled).length;
-              print(enabledCount);
-              return ListView.builder(
-                key: listKey,
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  list[index].currentPos = index;
-                  print(list[index].currentPos);
-                  return Opacity(
-                    opacity: list[index].enabled ? 1 : 0.5,
-                                        child: InkWell(
-                        onTap: () => setState(() {
-                              DatabaseService()
-                                  .changeEnabled(list[index], enabledCount);
-                            }),
-                        onLongPress: () => Nav.push(
-                            context,
-                            EditItemPage(
-                              item: list[index],
-                              listKey: listKey,
-                            )),
-                        child: list[index]),
-                  );
-                },
-              );
-            // } else {
-            //   return Center(
-            //     child: Column(
-            //       mainAxisAlignment: MainAxisAlignment.center,
-            //       children: [
-            //         Text('No items yet', style: TextStyle()),
-            //         Text('Try adding one', style: TextStyle()),
-            //       ],
-            //     ),
-            //   );
-            // }
-
-            // return ListView.builder(
-            //   itemCount: list.length,
-            //   itemBuilder: (context, index) {
-            //     return list[index].enabled ? list[index] : list[index];
-            //   },
-            // );
+              if (snapshot.data.length != 0) {
+                List<Item> list = snapshot.data;
+                return FutureBuilder<List<Tag>>(
+                    future: databaseService.getTags(),
+                    builder: (context, future) {
+                      if (future.hasData) {
+                        updateColors(list, future.data);
+                        return ListView.builder(
+                          key: listKey,
+                          itemCount: list.length,
+                          itemBuilder: (context, index) {
+                            Item item = list[index];
+                            return InkWell(
+                              onLongPress: () => Nav.push(
+                                  context,
+                                  EditItemPage(
+                                    item: item,
+                                    listKey: listKey,
+                                  )),
+                              child: Dismissible(
+                                key: Key(item.id),
+                                onDismissed: (direction) =>
+                                    databaseService.removeItem(item.id),
+                                child: ItemCard(item),
+                              ),
+                            );
+                          },
+                        );
+                      }
+                      return Text('loading...');
+                    });
+              } else {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('No items yet',
+                          style: TextStyle(fontSize: 18, color: Colors.grey)),
+                      SizedBox(height: 5),
+                      Text('Try adding one',
+                          style: TextStyle(fontSize: 16, color: Colors.grey)),
+                    ],
+                  ),
+                );
+              }
             } else {
               print('no Data...');
-              return SpinKitSpinningCircle(
+              return SpinKitCircle(
                 color: Colors.black,
               );
             }
