@@ -57,7 +57,8 @@ class _AddItemPageState extends State<AddItemPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Add Item', style: TextStyle()),
+          iconTheme: IconThemeData(color: Colors.white),
+          title: Text('Add Item', style: TextStyle(color: Colors.white)),
           centerTitle: true,
         ),
         body: Form(

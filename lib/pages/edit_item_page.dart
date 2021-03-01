@@ -44,7 +44,8 @@ class _EditItemPageState extends State<EditItemPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Edit Item', style: TextStyle()),
+          iconTheme: IconThemeData(color: Colors.white),
+          title: Text('Edit Item', style: TextStyle(color: Colors.white)),
           centerTitle: true,
         ),
         body: Form(

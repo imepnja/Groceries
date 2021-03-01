@@ -32,6 +32,23 @@ class _HomePageState extends State<HomePage> {
     }).toList();
   }
 
+  void edit(Item item) {
+    Nav.push(
+        context,
+        EditItemPage(
+          item: item,
+          listKey: listKey,
+        ));
+  }
+
+  // void dismiss(DismissDirection d, Item item) {
+  //   if (d == DismissDirection.startToEnd) {
+  //     databaseService.removeItem(item.id);
+  //   } else if (d == DismissDirection.endToStart) {
+  //     edit(item);
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,15 +102,10 @@ class _HomePageState extends State<HomePage> {
                           itemBuilder: (context, index) {
                             Item item = list[index];
                             return InkWell(
-                              onLongPress: () => Nav.push(
-                                  context,
-                                  EditItemPage(
-                                    item: item,
-                                    listKey: listKey,
-                                  )),
+                              onLongPress: () => edit(item),
                               child: Dismissible(
                                 key: Key(item.id),
-                                onDismissed: (direction) =>
+                                onDismissed: (d) =>
                                     databaseService.removeItem(item.id),
                                 child: ItemCard(item),
                               ),
@@ -101,7 +113,9 @@ class _HomePageState extends State<HomePage> {
                           },
                         );
                       }
-                      return Text('loading...');
+                      return SpinKitCircle(
+                        color: Colors.black,
+                      );
                     });
               } else {
                 return Center(

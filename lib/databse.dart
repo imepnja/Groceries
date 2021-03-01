@@ -9,21 +9,13 @@ class DatabaseService {
   Firestore _database = Firestore.instance;
 
   Stream<List<Item>> get groceryListStream {
-    // Stream groceriesStream = _;
-
-    // Stream tagsStream = ;
-    var group = StreamGroup();
-    // group.add(
     return _database
         .collection('groceries')
-        .orderBy('editDate')
+        // .orderBy('editDate', descending: true)
+        .orderBy('tags')
         // .orderBy('enabled', descending: true)
         .snapshots()
         .map(_itemListFromSnapshot);
-    // group.add(tagStream());
-    // group.close();
-    // var stream = group.stream.asBroadcastStream();
-    // print(stream.first);
   }
 
   List<Item> _itemListFromSnapshot(QuerySnapshot snapshot) {
